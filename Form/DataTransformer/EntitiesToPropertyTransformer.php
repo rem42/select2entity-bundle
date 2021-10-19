@@ -12,7 +12,6 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
  * Data transformer for multiple mode (i.e., multiple = true)
  *
  * Class EntitiesToPropertyTransformer
- * @package Tetranz\Select2EntityBundle\Form\DataTransformer
  */
 class EntitiesToPropertyTransformer implements DataTransformerInterface
 {
@@ -26,30 +25,28 @@ class EntitiesToPropertyTransformer implements DataTransformerInterface
 
     public function __construct(ObjectManager $em, string $class, ?string $textProperty = null, string $primaryKey = 'id', string $newTagPrefix = '__', string $newTagText = ' (NEW)')
     {
-        $this->em = $em;
-        $this->className = $class;
+        $this->em           = $em;
+        $this->className    = $class;
         $this->textProperty = $textProperty;
-        $this->primaryKey = $primaryKey;
+        $this->primaryKey   = $primaryKey;
         $this->newTagPrefix = $newTagPrefix;
-        $this->newTagText = $newTagText;
-        $this->accessor = PropertyAccess::createPropertyAccessor();
+        $this->newTagText   = $newTagText;
+        $this->accessor     = PropertyAccess::createPropertyAccessor();
     }
 
     /**
      * Transform initial entities to array
-     *
-     * @param mixed $entities
      */
     public function transform($entities): array
     {
         if (empty($entities)) {
-            return array();
+            return [];
         }
 
-        $data = array();
+        $data = [];
 
         foreach ($entities as $entity) {
-            $text = is_null($this->textProperty)
+            $text = null === $this->textProperty
                 ? (string) $entity
                 : $this->accessor->getValue($entity, $this->textProperty);
 
@@ -57,7 +54,7 @@ class EntitiesToPropertyTransformer implements DataTransformerInterface
                 $value = (string) $this->accessor->getValue($entity, $this->primaryKey);
             } else {
                 $value = $this->newTagPrefix . $text;
-                $text = $text.$this->newTagText;
+                $text  .= $this->newTagText;
             }
 
             $data[$value] = $text;
@@ -73,18 +70,20 @@ class EntitiesToPropertyTransformer implements DataTransformerInterface
      */
     public function reverseTransform($values): array
     {
-        if (!is_array($values) || empty($values)) {
-            return array();
+        if (!\is_array($values) || empty($values)) {
+            return [];
         }
 
         // add new tag entries
-        $newObjects = array();
-        $tagPrefixLength = strlen($this->newTagPrefix);
+        $newObjects      = [];
+        $tagPrefixLength = \strlen($this->newTagPrefix);
+
         foreach ($values as $key => $value) {
-            $cleanValue = substr($value, $tagPrefixLength);
+            $cleanValue  = substr($value, $tagPrefixLength);
             $valuePrefix = substr($value, 0, $tagPrefixLength);
+
             if ($valuePrefix == $this->newTagPrefix) {
-                $object = new $this->className;
+                $object = new $this->className();
                 $this->accessor->setValue($object, $this->textProperty, $cleanValue);
                 $newObjects[] = $object;
                 unset($values[$key]);
@@ -95,13 +94,14 @@ class EntitiesToPropertyTransformer implements DataTransformerInterface
         $entities = $this->em->createQueryBuilder()
             ->select('entity')
             ->from($this->className, 'entity')
-            ->where('entity.'.$this->primaryKey.' IN (:ids)')
+            ->where('entity.' . $this->primaryKey . ' IN (:ids)')
             ->setParameter('ids', $values)
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
 
-          // this will happen if the form submits invalid data
-        if (count($entities) != count($values)) {
+        // this will happen if the form submits invalid data
+        if (\count($entities) != \count($values)) {
             throw new TransformationFailedException('One or more id values are invalid');
         }
 

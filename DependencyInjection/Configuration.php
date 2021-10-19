@@ -18,31 +18,31 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('tetranz_select2_entity');
-        $rootNode = $treeBuilder->getRootNode();
+        $rootNode    = $treeBuilder->getRootNode();
 
         $rootNode
-                ->children()
-                    ->integerNode('minimum_input_length')->min(0)->defaultValue(1)->end()
-                    ->booleanNode('scroll')->defaultFalse()->end()
-                    ->integerNode('page_limit')->defaultValue(10)->end()
-                    ->booleanNode('allow_clear')->defaultFalse()->end()
-                    ->arrayNode('allow_add')->addDefaultsIfNotSet()
-                        ->children()
-                            ->booleanNode('enabled')->defaultFalse()->end()
-                            ->scalarNode('new_tag_text')->defaultValue(' (NEW)')->end()
-                            ->scalarNode('new_tag_prefix')->defaultValue('__')->end()
-                            ->scalarNode('tag_separators')->defaultValue('[",", " "]')->end()
-                        ->end()
+            ->children()
+                ->integerNode('minimum_input_length')->min(0)->defaultValue(1)->end()
+                ->booleanNode('scroll')->defaultFalse()->end()
+                ->integerNode('page_limit')->defaultValue(10)->end()
+                ->booleanNode('allow_clear')->defaultFalse()->end()
+                ->arrayNode('allow_add')->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')->defaultFalse()->end()
+                        ->scalarNode('new_tag_text')->defaultValue(' (NEW)')->end()
+                        ->scalarNode('new_tag_prefix')->defaultValue('__')->end()
+                        ->scalarNode('tag_separators')->defaultValue('[",", " "]')->end()
                     ->end()
-                    ->integerNode('delay')->defaultValue(250)->min(0)->end()
-                    ->scalarNode('language')->defaultValue('en')->end()
-                    ->scalarNode('theme')->defaultValue('default')->end()
-                    ->booleanNode('cache')->defaultTrue()->end()
-                    ->integerNode('cache_timeout')->defaultValue(60000)->min(0)->end()
-                    ->scalarNode('width')->defaultNull()->end()
-                    ->scalarNode('object_manager')->defaultNull()->end()
-                    ->booleanNode('render_html')->defaultFalse()->end()
-                ->end();
+                ->end()
+                ->integerNode('delay')->defaultValue(250)->min(0)->end()
+                ->scalarNode('language')->defaultValue('en')->end()
+                ->scalarNode('theme')->defaultValue('default')->end()
+                ->booleanNode('cache')->defaultTrue()->end()
+                ->integerNode('cache_timeout')->defaultValue(60000)->min(0)->end()
+                ->scalarNode('width')->defaultNull()->end()
+                ->scalarNode('object_manager')->defaultNull()->end()
+                ->booleanNode('render_html')->defaultFalse()->end()
+            ->end();
 
         return $treeBuilder;
     }

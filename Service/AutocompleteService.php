@@ -2,8 +2,8 @@
 
 namespace Tetranz\Select2EntityBundle\Service;
 
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,15 +18,15 @@ class AutocompleteService
     public function __construct(FormFactoryInterface $formFactory, ManagerRegistry $doctrine)
     {
         $this->formFactory = $formFactory;
-        $this->doctrine = $doctrine;
-    }   
+        $this->doctrine    = $doctrine;
+    }
 
     /**
-     * @param string|FormTypeInterface $type
+     * @param FormTypeInterface|string $type
      */
     public function getAutocompleteResults(Request $request, $type): array
     {
-        $form = $this->formFactory->create($type);
+        $form         = $this->formFactory->create($type);
         $fieldOptions = $form->get($request->get('field_name'))->getConfig()->getOptions();
 
         /** @var EntityRepository $repo */
@@ -37,29 +37,29 @@ class AutocompleteService
         $countQB = $repo->createQueryBuilder('e');
         $countQB
             ->select($countQB->expr()->count('e'))
-            ->where('e.'.$fieldOptions['property'].' LIKE :term')
+            ->where('e.' . $fieldOptions['property'] . ' LIKE :term')
             ->setParameter('term', '%' . $term . '%')
         ;
 
         $maxResults = $fieldOptions['page_limit'];
-        $offset = ($request->get('page', 1) - 1) * $maxResults;
+        $offset     = ($request->get('page', 1) - 1) * $maxResults;
 
         $resultQb = $repo->createQueryBuilder('e');
         $resultQb
-            ->where('e.'.$fieldOptions['property'].' LIKE :term')
+            ->where('e.' . $fieldOptions['property'] . ' LIKE :term')
             ->setParameter('term', '%' . $term . '%')
             ->setMaxResults($maxResults)
             ->setFirstResult($offset)
         ;
 
-        if (is_callable($fieldOptions['callback'])) {
+        if (\is_callable($fieldOptions['callback'])) {
             $cb = $fieldOptions['callback'];
 
             $cb($countQB, $request);
             $cb($resultQb, $request);
         }
 
-        $count = $countQB->getQuery()->getSingleScalarResult();
+        $count             = $countQB->getQuery()->getSingleScalarResult();
         $paginationResults = $resultQb->getQuery()->getResult();
 
         $result = ['results' => null, 'more' => $count > ($offset + $maxResults)];
